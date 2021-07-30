@@ -1,0 +1,14 @@
+dist: trusty
+
+language: generic
+
+env:
+  - PROJECT=docker-postfix-noreply TAG=1.0
+
+stage: build image
+script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t $PROJECT .
+  - docker tag $PROJECT $DOCKER_ORGANIZATION/$PROJECT:$TAG
+  - docker push $DOCKER_ORGANIZATION/$PROJECT:$TAG
+  - docker run --rm --entrypoint "/bin/bash" $DOCKER_ORGANIZATION/$PROJECT:$TAG -c "if [ -e /entrypoint.sh ]; then (exit 0); else (exit 1); fi"
